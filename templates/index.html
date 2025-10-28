@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="mb-4 text-center">
+  <h3>BIENVENIDA {{ usuario.nombre }}</h3>
+</div>
+
+{% if usuario.rol == 'administrador' %}
+<div class="d-flex justify-content-center mb-4 flex-wrap gap-2">
+  <a href="{{ url_for('nueva_encuesta') }}" class="btn btn-success btn-lg">Nueva Encuesta</a>
+  <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg">Usuarios</a>
+</div>
+{% endif %}
+
+<div class="row row-cols-1 row-cols-md-2 g-3">
+  {% for e in encuestas %}
+  <div class="col">
+    <div class="card h-100 p-3 shadow-sm">
+      <h5>{{ e[1] }}</h5>
+      <p class="text-muted">{{ e[2] }}</p>
+      <div class="d-flex flex-wrap gap-2 mt-3">
+        <a href="{{ url_for('responder', id_encuesta=e[0]) }}" class="btn btn-primary btn-sm">Responder</a>
+        {% if usuario.rol == 'administrador' %}
+        <a href="{{ url_for('preguntas', id_encuesta=e[0]) }}" class="btn btn-outline-secondary btn-sm">Preguntas</a>
+        <a href="{{ url_for('resultados', id_encuesta=e[0]) }}" class="btn btn-info btn-sm">Ver Resultados</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  {% else %}
+  <div class="col-12">
+    <p class="text-center">No hay encuestas.</p>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

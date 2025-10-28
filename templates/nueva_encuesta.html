@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<h3>Nueva Encuesta</h3>
+<form method="POST" class="row g-3">
+  <div class="col-md-6">
+    <input type="text" name="titulo" class="form-control" placeholder="Título de la Encuesta" required>
+  </div>
+  <div class="col-md-6">
+    <input type="text" name="descripcion" class="form-control" placeholder="Descripción (opcional)">
+  </div>
+  <div class="col-12">
+    <button type="submit" class="btn btn-success">Crear Encuesta</button>
+    <a href="{{ url_for('panel') }}" class="btn btn-secondary">Volver al Panel</a>
+  </div>
+</form>
+{% endblock %}

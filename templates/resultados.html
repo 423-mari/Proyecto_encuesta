@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h3>Resultados de {{ encuesta[1] }}</h3>
+
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>Pregunta</th>
+          <th>Usuario</th>
+          <th>Respuesta Texto</th>
+          <th>Valor</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in respuestas %}
+        <tr>
+          <td>{{ r[0] }}</td>
+          <td>{{ r[4] or 'No responde' }}</td>
+          <td>{{ r[3] or '' }}</td>
+          <td>{{ r[2] if r[2] is not none else '' }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <h5>Promedios por Pregunta (solo valor)</h5>
+    <canvas id="chartPromedios" width="400" height="150"
+            data-labels="{{ labels|tojson|safe }}"
+            data-values="{{ dataValues|tojson|safe }}"></canvas>
+
+    <script>
+    const canvas = document.getElementById('chartPromedios');
+    const labels = JSON.parse(canvas.dataset.labels);
+    const dataValues = JSON.parse(canvas.dataset.values);
+
+    new Chart(canvas, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Promedio',
+                data: dataValues,
+                backgroundColor: 'rgba(54, 162, 235, 0.7)'
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: { y: { beginAtZero: true } }
+        }
+    });
+    </script>
+
+    <a href="{{ url_for('panel') }}" class="btn btn-secondary mt-3">Volver al Panel</a>
+</div>
+{% endblock %}

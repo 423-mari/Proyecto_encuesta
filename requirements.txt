@@ -1,0 +1,4 @@
+Flask
+flask-login
+fpdf
+werkzeug

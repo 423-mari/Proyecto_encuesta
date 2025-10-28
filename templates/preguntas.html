@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="col-md-8 mx-auto">
+  <div class="card p-3 shadow-sm">
+    <h4>Preguntas para: {{ encuesta[1] }}</h4>
+    <form method="POST" class="mb-3">
+      <div class="mb-3">
+        <label class="form-label">Texto de la pregunta</label>
+        <input class="form-control" name="texto_pregunta" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Tipo</label>
+        <select name="tipo" class="form-select">
+          <option value="valor">Valor (numérico, e.g., 1-5)</option>
+          <option value="texto">Texto</option>
+        </select>
+      </div>
+      <div class="d-flex justify-content-between">
+        <a href="{{ url_for('panel') }}" class="btn btn-secondary">Volver</a>
+        <button class="btn btn-primary">Añadir Pregunta</button>
+      </div>
+    </form>
+
+    <h5>Listado de preguntas</h5>
+    <ul class="list-group">
+      {% for p in preguntas %}
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        <span>{{ p[1] }} — <small>{{ p[2] }}</small></span>
+        <div class="btn-group btn-group-sm">
+          <a href="#" class="btn btn-warning">Editar</a>
+          <a href="#" class="btn btn-danger">Eliminar</a>
+        </div>
+      </li>
+      {% else %}
+      <li class="list-group-item">Sin preguntas</li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
+{% endblock %}
