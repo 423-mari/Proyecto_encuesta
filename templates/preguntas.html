@@ -1,8 +1,12 @@
 {% extends 'base.html' %}
+
 {% block content %}
 <div class="col-md-8 mx-auto">
   <div class="card p-3 shadow-sm">
-    <h4>Preguntas para: {{ encuesta[1] }}</h4>
+    <h4 class="text-center mb-3 text-dark">Pregunta: {{ encuesta[1] }}</h4>
+
+    <!-- Formulario para agregar nueva pregunta -->
+    {% if not editar %}
     <form method="POST" class="mb-3">
       <div class="mb-3">
         <label class="form-label">Texto de la pregunta</label>
@@ -17,24 +21,44 @@
       </div>
       <div class="d-flex justify-content-between">
         <a href="{{ url_for('panel') }}" class="btn btn-secondary">Volver</a>
-        <button class="btn btn-primary">Añadir Pregunta</button>
+        <button type="submit" class="btn btn-primary">Añadir Pregunta</button>
       </div>
     </form>
+    {% endif %}
+
+    <!-- Formulario para editar pregunta -->
+    {% if editar %}
+    <form method="POST" class="mb-3">
+      <div class="mb-3">
+        <label class="form-label">Editar pregunta</label>
+        <input class="form-control" name="texto_pregunta" value="{{ editar[2] }}" required>
+      </div>
+      <div class="d-flex justify-content-between">
+        <a href="{{ url_for('preguntas', id_encuesta=editar[1]) }}" class="btn btn-secondary">Cancelar</a>
+        <button type="submit" class="btn btn-warning">Actualizar Pregunta</button>
+      </div>
+    </form>
+    {% endif %}
 
     <h5>Listado de preguntas</h5>
     <ul class="list-group">
       {% for p in preguntas %}
       <li class="list-group-item d-flex justify-content-between align-items-center">
-        <span>{{ p[1] }} — <small>{{ p[2] }}</small></span>
+        <span>{{ p[2] }} — <small>{{ p[3] }}</small></span>
         <div class="btn-group btn-group-sm">
-          <a href="#" class="btn btn-warning">Editar</a>
-          <a href="#" class="btn btn-danger">Eliminar</a>
+          <a href="{{ url_for('editar_pregunta', id_pregunta=p[0]) }}" class="btn btn-info">Editar</a>
+          <form method="POST" action="{{ url_for('eliminar_pregunta', id_pregunta=p[0]) }}" style="display:inline;">
+            <button type="submit" class="btn btn-danger" onclick="return confirm('¿Seguro que quieres eliminar esta pregunta?');">
+              Eliminar
+            </button>
+          </form>
         </div>
       </li>
       {% else %}
       <li class="list-group-item">Sin preguntas</li>
       {% endfor %}
     </ul>
+
   </div>
 </div>
 {% endblock %}

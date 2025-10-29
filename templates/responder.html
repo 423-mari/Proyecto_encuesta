@@ -17,8 +17,8 @@
             <!-- Botones de administrador para editar o eliminar pregunta -->
             {% if usuario.rol == 'administrador' %}
             <div class="mt-2">
-                <a href="{{ url_for('editar_pregunta', id=p[0]) }}" class="btn btn-sm btn-info">Editar Pregunta</a>
-                <a href="{{ url_for('eliminar_pregunta', id=p[0]) }}" class="btn btn-sm btn-danger"
+                <a href="{{ url_for('editar_pregunta', id_pregunta=p[0]) }}" class="btn btn-sm btn-info">Editar Pregunta</a>
+                <a href="{{ url_for('eliminar_pregunta', id_pregunta=p[0]) }}" class="btn btn-sm btn-danger"
                    onclick="return confirm('¿Seguro que deseas eliminar esta pregunta?');">Eliminar Pregunta</a>
             </div>
             {% endif %}

@@ -83,7 +83,7 @@ def register():
                     (nombre, correo, rol, password))
         conn.commit()
         conn.close()
-        flash("Usuario registrado exitosamente", "success")
+        flash("Usuario registrado exitosamente", "Dark")
         return redirect(url_for("register"))
     return render_template("register.html")
 
@@ -129,42 +129,60 @@ def preguntas(id_encuesta):
     return render_template("preguntas.html", encuesta=encuesta, preguntas=preguntas)
 
 # ---------- Editar pregunta ----------
-@app.route("/preguntas/<int:id>/editar", methods=["GET","POST"])
+@app.route("/pregunta/<int:id_pregunta>/editar", methods=["GET","POST"])
 @login_required
-def editar_pregunta(id):
-    if current_user.rol != "administrador":
-        flash("No tienes permisos", "danger")
-        return redirect(url_for("panel"))
+def editar_pregunta(id_pregunta):
     conn = get_connection()
     cur = conn.cursor()
-    cur.execute("SELECT * FROM preguntas WHERE id = ?", (id,))
+    cur.execute("SELECT * FROM preguntas WHERE id = ?", (id_pregunta,))
     pregunta = cur.fetchone()
+
+    if not pregunta:
+        flash("Pregunta no encontrada", "danger")
+        return redirect(url_for("panel"))
+
+    # Obtener la encuesta a la que pertenece la pregunta
+    id_encuesta = pregunta[1]  # suponiendo que la columna 1 es id_encuesta
+    cur.execute("SELECT * FROM encuestas WHERE id = ?", (id_encuesta,))
+    encuesta = cur.fetchone()
+
+    # Obtener todas las preguntas de esa encuesta
+    cur.execute("SELECT * FROM preguntas WHERE id_encuesta = ?", (id_encuesta,))
+    preguntas = cur.fetchall()
+
     if request.method == "POST":
-        texto = request.form["texto_pregunta"]
-        tipo = request.form["tipo"]
-        cur.execute("UPDATE preguntas SET texto_pregunta=?, tipo=? WHERE id=?", (texto, tipo, id))
+        nuevo_texto = request.form["texto_pregunta"]
+        cur.execute("UPDATE preguntas SET texto_pregunta = ? WHERE id = ?", (nuevo_texto, id_pregunta))
         conn.commit()
         conn.close()
-        flash("Pregunta actualizada", "success")
-        return redirect(url_for("preguntas", id_encuesta=pregunta[1]))
-    conn.close()
-    return render_template("editar_pregunta.html", pregunta=pregunta)
+        flash("Pregunta actualizada correctamente", "success")
+        return redirect(url_for("preguntas", id_encuesta=id_encuesta))
 
-# ---------- Eliminar pregunta ----------
-@app.route("/preguntas/<int:id>/eliminar")
+    conn.close()
+    return render_template("preguntas.html", encuesta=encuesta, preguntas=preguntas, editar=pregunta)
+
+# ---------- Eliminar pregunta  admin----------
+@app.route("/pregunta/<int:id_pregunta>/eliminar", methods=["POST"])
 @login_required
-def eliminar_pregunta(id):
+def eliminar_pregunta(id_pregunta):
     if current_user.rol != "administrador":
-        flash("No tienes permisos", "danger")
+        flash("No tienes permisos para eliminar preguntas", "danger")
         return redirect(url_for("panel"))
+
     conn = get_connection()
     cur = conn.cursor()
-    cur.execute("SELECT id_encuesta FROM preguntas WHERE id=?", (id,))
-    id_encuesta = cur.fetchone()[0]
-    cur.execute("DELETE FROM preguntas WHERE id=?", (id,))
-    conn.commit()
+    # Buscamos el id_encuesta antes de eliminar
+    cur.execute("SELECT id_encuesta FROM preguntas WHERE id=?", (id_pregunta,))
+    result = cur.fetchone()
+    if result:
+        id_encuesta = result[0]
+        cur.execute("DELETE FROM preguntas WHERE id=?", (id_pregunta,))
+        conn.commit()
+        flash("Pregunta eliminada correctamente", "warning")
+    else:
+        flash("La pregunta no existe", "danger")
+
     conn.close()
-    flash("Pregunta eliminada", "warning")
     return redirect(url_for("preguntas", id_encuesta=id_encuesta))
 
 # ---------- Responder encuesta ----------
@@ -248,6 +266,29 @@ def resultados(id_encuesta):
 
     conn.close()
     return render_template("resultados.html", encuesta=encuesta, respuestas=respuestas, labels=labels, dataValues=dataValues)
+
+    # ---------- Eliminar encuesta (solo admin) ----------
+@app.route("/encuestas/eliminar", methods=["POST"])
+@login_required
+def eliminar_encuesta():
+    if current_user.rol != "administrador":
+        flash("No tienes permisos para eliminar encuestas", "danger")
+        return redirect(url_for("panel"))
+    
+     # Tomar el id desde el formulario
+    id_encuesta = request.form.get("id_encuesta")
+    if id_encuesta:
+        conn = get_connection()
+        cur = conn.cursor()
+        cur.execute("DELETE FROM encuestas WHERE id=?", (id_encuesta,))
+        conn.commit()
+        conn.close()
+        flash("Encuesta eliminada correctamente.", "success")
+    else:
+        flash("No se seleccionó ninguna encuesta", "warning")
+
+    return redirect(url_for("panel"))
+
 
 if __name__=="__main__":
     app.run(debug=True)
